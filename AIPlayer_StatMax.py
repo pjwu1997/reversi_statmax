@@ -16,7 +16,7 @@ def count_remaining(board, color='.'):
                 count += 1
     return count
 class statmodel:
-    def __init__(self, window_length=5, fixed=False):
+    def __init__(self, window_length=3, fixed=False):
         self.mean = 0.5
         self.std = 0.5
         self.distribution = 'normal'
@@ -49,8 +49,8 @@ class statmodel:
             if not self.fixed:
                 mean = np.mean(self.record[-self.window_length:])
                 std = np.std(self.record[-self.window_length:])
-                self.std = 0.1 * std + 0.90 * self.std
-                self.mean = 0.1 * value + 0.90 * self.mean
+                self.std = 0.05 * std + 0.95 * self.std
+                self.mean = 0.05 * value + 0.95 * self.mean
             else:
                 self.std = np.std(self.record)
                 self.mean = np.mean(self.record)
@@ -174,12 +174,12 @@ class MCTS(object):
                 sub_node = self.expand(node)
                 return sub_node
             else:
-                predict_length = count_remaining(node.board_) * proportion / 2
+                predict_length = count_remaining(node.board_) * proportion
                 if predict_length < 1:
                     predict_length = 1
                 if node.color != self.mycolor:
-                    # node = self.best_child(node, predict_length)
-                    node = self.best_child_base(node, 1 / math.sqrt(2.0))
+                    node = self.best_child(node, predict_length)
+                    # node = self.best_child_base(node, 1 / math.sqrt(2.0))
                 # 否则就从子节点中找一个最好，重新开始
                 else:
                     node = self.best_child(node,predict_length)
@@ -284,8 +284,8 @@ class MCTS(object):
         best_node = node
         max_value = -np.inf
         rand = np.random.rand()
-        if rand < 0.1:
-            return random.choice(list(node.children.keys()))
+        # if rand < 0.1:
+        #     return random.choice(list(node.children.keys()))
         for sub_node in node.children.keys():
             if sub_node.visit_times < 3:
                 return sub_node

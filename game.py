@@ -6,6 +6,7 @@ import datetime
 from board import Board
 from copy import deepcopy
 import time
+import multiprocessing as mp
 
 
 class Game(object):
@@ -205,26 +206,44 @@ class Game(object):
 
         return is_over
 
+from AIPlayer_AlphaBeta import AIPlayer_AlphaBeta
+# from AIPlayer_MCTS import AIPlayer as AIPlayer_MCTS
+from Random_player import RandomPlayer
+from AIPlayer_MCTS import AIPlayer as AIPlayer_MCTS
+from AIPlayer_StatMax import AIPlayer as AIPlayer_StatMax
+from AIPlayer_Maxmedian import AIPlayer as AIPlayer_Maxmedian
+from AIPlayer_UCBV import AIPlayer as AIPlayer_UCBV
+
+def play_game(_):
+    o = AIPlayer_MCTS("O", 100)
+    x = AIPlayer_StatMax("X", 100)
+    # x = AIPlayer_UCBV("X", 100)
+    # x = AIPlayer_Maxmedian("X", 50)
+    game = Game(x, o)
+    a = game.run()
+    if a[0] == 'black_win':
+        return 1
+    elif a[0] == 'draw':
+        return 0.5
+    else:
+        return 0
+    
 
 
 if __name__ == '__main__':
-    from AIPlayer_AlphaBeta import AIPlayer_AlphaBeta
-    # from AIPlayer_MCTS import AIPlayer as AIPlayer_MCTS
-    from Random_player import RandomPlayer
-    from AIPlayer_MCTS import AIPlayer as AIPlayer_MCTS
-    from AIPlayer_StatMax import AIPlayer as AIPlayer_StatMax
-    from AIPlayer_Maxmedian import AIPlayer as AIPlayer_Maxmedian
-    from AIPlayer_UCBV import AIPlayer as AIPlayer_UCBV
     # x = AIPlayer_AlphaBeta("X")
-    result = {'black_win':0,'white_win':0,'draw':0}
-    for i in range(100):
-        # o = RandomPlayer("O")
-        o = AIPlayer_MCTS("O", 100)
-        x = AIPlayer_StatMax("X", 100)
-        # x = AIPlayer_UCBV("X", 100)
-        # x = AIPlayer_Maxmedian("X", 50)
-        game = Game(x, o)
-        a = game.run()
-        result[a[0]] += 1
-        print(result)
-        time.sleep(1)
+    pool = mp.Pool(10)
+    result = pool.map(play_game, [i for i in range(50)])
+    print(sum(result) / len(result))
+    # result = {'black_win':0,'white_win':0,'draw':0}
+    # for i in range(100):
+    #     # o = RandomPlayer("O")
+    #     o = AIPlayer_MCTS("O", 100)
+    #     x = AIPlayer_StatMax("X", 100)
+    #     # x = AIPlayer_UCBV("X", 100)
+    #     # x = AIPlayer_Maxmedian("X", 50)
+    #     game = Game(x, o)
+    #     a = game.run()
+    #     result[a[0]] += 1
+    #     print(result)
+    #     time.sleep(1)
